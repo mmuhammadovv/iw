@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xalqaro reytinglarning kundalik hayotimizga ta’siri</title>
+<style>
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --surface-2:#eef1f8; --text:#1a2233; --muted:#5d6880;
+  --border:#d6dcea; --accent:#2f5bd3; --accent-ink:#ffffff; --accent-soft:#e3eafc;
+  --ok:#1f8a4c; --ok-soft:#dcf3e5; --bad:#c23b3b; --bad-soft:#fbe1e1;
+  --cell:#ffffff; --cell-block:transparent; --hl:#fff1b8; --shadow:0 2px 10px rgba(20,30,60,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151f; --surface:#1a2030; --surface-2:#232a3d; --text:#e8ecf5; --muted:#9aa5bd;
+    --border:#33405a; --accent:#6e93ff; --accent-ink:#0d1220; --accent-soft:#25335a;
+    --ok:#4cc57f; --ok-soft:#173a28; --bad:#ff7a7a; --bad-soft:#4a1f24;
+    --cell:#262e44; --hl:#5a4d16; --shadow:0 2px 10px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151f; --surface:#1a2030; --surface-2:#232a3d; --text:#e8ecf5; --muted:#9aa5bd;
+  --border:#33405a; --accent:#6e93ff; --accent-ink:#0d1220; --accent-soft:#25335a;
+  --ok:#4cc57f; --ok-soft:#173a28; --bad:#ff7a7a; --bad-soft:#4a1f24;
+  --cell:#262e44; --hl:#5a4d16; --shadow:0 2px 10px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45;font-size:17px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+header h1{font-size:clamp(22px,3.2vw,34px);margin:0;line-height:1.15}
+header p{margin:4px 0 0;color:var(--muted)}
+.tabs{display:flex;gap:6px;background:var(--surface-2);padding:5px;border-radius:12px}
+.tab{border:0;background:transparent;color:var(--text);font:inherit;font-weight:600;padding:9px 18px;border-radius:9px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);box-shadow:var(--shadow);color:var(--accent)}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:600;padding:9px 16px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+[hidden]{display:none!important}
+
+/* Teams */
+.teams{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:16px}
+.team{flex:1 1 170px;display:flex;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:10px 12px;cursor:pointer;min-width:0}
+.team.active{border-color:var(--accent);background:var(--accent-soft)}
+.team input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;font-weight:700}
+.team input:focus{outline:2px solid var(--accent);border-radius:6px}
+.team .score{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.team .adj{display:flex;flex-direction:column;gap:2px}
+.team .adj button{border:1px solid var(--border);background:var(--surface-2);color:var(--text);width:24px;height:20px;line-height:1;border-radius:5px;cursor:pointer;font-size:14px;padding:0}
+.team-tools{display:flex;gap:6px;align-items:center}
+.turn-note{color:var(--muted);font-size:15px;margin:-6px 0 12px}
+.turn-note b{color:var(--accent)}
+
+/* Test */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.qnum{font-weight:700;color:var(--accent)}
+.dots{display:flex;flex-wrap:wrap;gap:5px}
+.dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:0}
+.dot.cur{outline:2px solid var(--accent);outline-offset:1px}
+.dot.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.dot.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+.question{font-size:clamp(20px,2.6vw,28px);font-weight:700;margin:8px 0 18px;line-height:1.3}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.options{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:2px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:clamp(16px,1.9vw,20px);padding:14px 16px;border-radius:14px;cursor:pointer;transition:transform .08s,border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt .let{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-weight:800}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft)}
+.opt.correct .let{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .let{background:var(--bad);color:#fff}
+.opt.dim{opacity:.55}
+.feedback{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:18px}
+.feedback.ok{background:var(--ok-soft);border:1px solid var(--ok)}
+.feedback.bad{background:var(--bad-soft);border:1px solid var(--bad)}
+.feedback .t{font-weight:800;font-size:22px;display:block;margin-bottom:4px}
+.feedback.ok .t{color:var(--ok)} .feedback.bad .t{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.final{text-align:center;padding:28px 10px}
+.final h2{font-size:30px;margin:0 0 6px}
+.final .rows{max-width:460px;margin:18px auto;display:grid;gap:8px}
+.final .row{display:flex;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--surface-2);font-size:20px;font-weight:700}
+.final .row.win{background:var(--ok-soft);border:1px solid var(--ok)}
+
+/* Crossword */
+.cw{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.cw{grid-template-columns:1fr}}
+.grid-box{overflow:auto;padding:4px}
+.grid{display:grid;gap:0;margin:0 auto;width:max-content}
+.cell{width:var(--cs,36px);height:var(--cs,36px);position:relative}
+.cell.on{background:var(--cell);border:1px solid var(--text);margin:0 -1px -1px 0}
+.cell.on.hl{background:var(--hl)}
+.cell .n{position:absolute;top:1px;left:3px;font-size:calc(var(--cs,36px)*.28);font-weight:700;color:var(--muted);line-height:1}
+.cell .l{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:calc(var(--cs,36px)*.55);color:var(--accent);text-transform:uppercase}
+.cell .l.pop{animation:pop .35s ease-out both}
+@keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.clues h3{margin:4px 0 8px;font-size:18px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.clue{display:flex;gap:10px;align-items:flex-start;padding:10px 10px;border-radius:12px;border:1px solid transparent;cursor:pointer}
+.clue:hover{background:var(--surface-2)}
+.clue.sel{border-color:var(--accent);background:var(--accent-soft)}
+.clue.done .ct{color:var(--muted)}
+.clue .cn{flex:none;min-width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800}
+.clue .ct{flex:1;min-width:0}
+.clue .dir{font-size:13px;color:var(--accent);margin-right:4px;white-space:nowrap}
+.clue .len{color:var(--muted);font-size:14px;white-space:nowrap}
+.clue .ans{display:block;font-weight:800;color:var(--ok);letter-spacing:.08em;margin-top:2px}
+.cw-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.big-clue{margin-bottom:14px;padding:14px 16px;border-radius:12px;background:var(--accent-soft);font-size:clamp(18px,2.2vw,24px);font-weight:600;min-height:58px}
+.big-clue small{display:block;font-size:14px;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="test">Test</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="cw">Krossvord</button>
+    </div>
+  </header>
+
+  <!-- TEST -->
+  <section id="tab-test">
+    <div class="teams" id="teams"></div>
+    <div class="turn-note" id="turnNote"></div>
+    <div class="card" id="qcard">
+      <div class="qhead">
+        <span class="qnum" id="qnum"></span>
+        <div class="dots" id="dots"></div>
+      </div>
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div id="feedback"></div>
+      <div class="nav">
+        <button class="btn" id="prevBtn">← Oldingi</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="restartBtn">Qaytadan boshlash</button>
+          <button class="btn primary" id="nextBtn">Keyingi savol →</button>
+        </div>
+      </div>
+    </div>
+    <div class="card final" id="final" hidden></div>
+  </section>
+
+  <!-- CROSSWORD -->
+  <section id="tab-cw" hidden>
+    <div class="cw">
+      <div class="card">
+        <div class="cw-tools">
+          <button class="btn" id="showAll">Hammasini ko‘rsatish</button>
+          <button class="btn" id="hideAll">Hammasini yashirish</button>
+        </div>
+        <div class="big-clue" id="bigClue"><small>Savolni tanlang</small>O‘ng tomondagi (yoki pastdagi) savol ustiga bosing — u bu yerda katta ko‘rinadi va katakchalar belgilanadi.</div>
+        <div class="grid-box" id="gridBox"><div class="grid" id="grid"></div></div>
+      </div>
+      <div class="card clues">
+        <h3>Savollar</h3>
+        <div id="cluesA"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const DATA = {
+ "title": "Xalqaro reytinglarning kundalik hayotimizga ta’siri",
+ "subtitle": "Mustaqil ish · Jamoaviy test va krossvord",
+ "test": [
+  {
+   "q": "Xalqaro reyting nima?",
+   "options": [
+    "Mamlakatlarni muayyan ko‘rsatkichlar asosida baholab, tartiblangan ro‘yxat",
+    "Davlatlar o‘rtasidagi savdo shartnomasi",
+    "Xalqaro sport musobaqasi",
+    "Valyuta ayirboshlash kursi"
+   ],
+   "correct": 0,
+   "izoh": "Reytinglar mamlakatning boshqa davlatlarga nisbatan qaysi o‘rinda ekanini ko‘rsatadi."
+  },
+  {
+   "q": "«Inson taraqqiyoti indeksi»ni qaysi tashkilot hisoblab boradi?",
+   "options": [
+    "Jahon banki",
+    "BMT Taraqqiyot dasturi (UNDP)",
+    "Xalqaro valyuta jamg‘armasi",
+    "Jahon savdo tashkiloti"
+   ],
+   "correct": 1,
+   "izoh": "Inson taraqqiyoti indeksi (HDI) har yili BMT Taraqqiyot dasturi tomonidan e’lon qilinadi."
+  },
+  {
+   "q": "Inson taraqqiyoti indeksi qaysi uch yo‘nalishni o‘lchaydi?",
+   "options": [
+    "Umr davomiyligi, ta’lim, aholi daromadi",
+    "Armiya, sport, madaniyat",
+    "Eksport, import, inflyatsiya",
+    "Aholi soni, hudud, iqlim"
+   ],
+   "correct": 0,
+   "izoh": "Uzoq va sog‘lom hayot, bilim olish imkoniyati hamda munosib turmush darajasi baholanadi."
+  },
+  {
+   "q": "Korrupsiyani idrok etish indeksini qaysi tashkilot e’lon qiladi?",
+   "options": [
+    "Amnesty International",
+    "Transparency International",
+    "Freedom House",
+    "Qizil Xoch"
+   ],
+   "correct": 1,
+   "izoh": "Transparency International har yili mamlakatlarni davlat sektoridagi korrupsiya darajasi bo‘yicha baholaydi."
+  },
+  {
+   "q": "Global innovatsion indeksni qaysi tashkilot tayyorlaydi?",
+   "options": [
+    "Jahon intellektual mulk tashkiloti (WIPO)",
+    "YuNESKO",
+    "Jahon sog‘liqni saqlash tashkiloti",
+    "NATO"
+   ],
+   "correct": 0,
+   "izoh": "WIPO mamlakatlarning ilm-fan, texnologiya va innovatsiya salohiyatini baholaydi."
+  },
+  {
+   "q": "PISA xalqaro dasturi nimani baholaydi?",
+   "options": [
+    "Talabalarning sport natijalarini",
+    "15 yoshli o‘quvchilarning o‘qish, matematika va tabiiy fanlar bo‘yicha savodxonligini",
+    "O‘qituvchilarning maoshini",
+    "Maktab binolarining holatini"
+   ],
+   "correct": 1,
+   "izoh": "PISA Iqtisodiy hamkorlik va taraqqiyot tashkiloti (OECD) tomonidan o‘tkaziladi; natijalar ta’lim islohotlariga asos bo‘ladi."
+  },
+  {
+   "q": "Davlatning kredit reytingi oshsa, bu oddiy fuqaro hayotiga qanday ta’sir qiladi?",
+   "options": [
+    "Hech qanday ta’sir qilmaydi",
+    "Xorijiy kreditlar arzonlashadi, investitsiya va yangi ish o‘rinlari ko‘payadi",
+    "Soliqlar avtomatik ravishda bekor qilinadi",
+    "Narxlar ikki baravar oshadi"
+   ],
+   "correct": 1,
+   "izoh": "Yuqori reyting investorlar ishonchini oshiradi: banklar va korxonalar arzonroq mablag‘ jalb qiladi."
+  },
+  {
+   "q": "Kredit reyting agentliklarining «katta uchligi»ga qaysilar kiradi?",
+   "options": [
+    "Fitch, Moody’s, S&P Global",
+    "Google, Apple, Microsoft",
+    "UNDP, UNICEF, UNESCO",
+    "Visa, Mastercard, PayPal"
+   ],
+   "correct": 0,
+   "izoh": "Bu agentliklar davlatlar va kompaniyalarning qarzni qaytara olish qobiliyatini baholaydi."
+  },
+  {
+   "q": "Jahon bankining «Doing Business» reytingi o‘rniga 2024-yildan qaysi yangi reyting e’lon qilina boshladi?",
+   "options": [
+    "Business Ready (B-READY)",
+    "World Happiness Report",
+    "Global Peace Index",
+    "Human Capital Index"
+   ],
+   "correct": 0,
+   "izoh": "B-READY biznes yuritish muhitini — kompaniya ochish, soliq, nizolarni hal qilish va boshqalarni baholaydi."
+  },
+  {
+   "q": "«Jahon baxt hisoboti» (World Happiness Report) asosan nimani o‘lchaydi?",
+   "options": [
+    "Mamlakatdagi bayramlar sonini",
+    "Aholining o‘z hayotidan qoniqish darajasini",
+    "Turistlar sonini",
+    "Oziq-ovqat narxlarini"
+   ],
+   "correct": 1,
+   "izoh": "Hisobotda daromad, sog‘liq, ijtimoiy qo‘llab-quvvatlash, erkinlik va ishonch kabi omillar hisobga olinadi."
+  },
+  {
+   "q": "Matbuot erkinligi indeksini qaysi tashkilot e’lon qiladi?",
+   "options": [
+    "Chegara bilmas muxbirlar (Reporters Without Borders)",
+    "Jahon banki",
+    "Interpol",
+    "FIFA"
+   ],
+   "correct": 0,
+   "izoh": "Indeks jurnalistlar faoliyati erkinligi va axborot olish imkoniyatini baholaydi."
+  },
+  {
+   "q": "O‘zbekistonda xalqaro reyting va indekslar bilan tizimli ishlash 2020-yilda qaysi hujjat bilan yo‘lga qo‘yilgan?",
+   "options": [
+    "Prezident farmoni",
+    "Vazirlik buyrug‘i",
+    "Hokim qarori",
+    "Mahalla yig‘ini qarori"
+   ],
+   "correct": 0,
+   "izoh": "2020-yil 2-iyundagi PF-6003-son Prezident farmoni bilan har bir reyting uchun mas’ul idoralar belgilangan."
+  },
+  {
+   "q": "BMTning Elektron hukumat rivojlanish indeksi yaxshilanishi kundalik hayotda nimada ko‘rinadi?",
+   "options": [
+    "Davlat xizmatlarini onlayn (masalan, my.gov.uz orqali) olish imkoniyati kengayadi",
+    "Ob-havo yaxshilanadi",
+    "Avtomobillar arzonlashadi",
+    "Telefonlar tezroq zaryadlanadi"
+   ],
+   "correct": 0,
+   "izoh": "Navbatlar qisqaradi, ma’lumotnomalarni uydan turib olish mumkin bo‘ladi, vaqt va mablag‘ tejaladi."
+  },
+  {
+   "q": "«Qonun ustuvorligi indeksi»ni qaysi tashkilot hisoblaydi?",
+   "options": [
+    "World Justice Project",
+    "Jahon savdo tashkiloti",
+    "OPEK",
+    "Xalqaro Olimpiya qo‘mitasi"
+   ],
+   "correct": 0,
+   "izoh": "Indeks sud tizimi, huquqlar himoyasi, korrupsiyaning yo‘qligi kabi omillarni baholaydi."
+  },
+  {
+   "q": "«Global gender tafovuti hisoboti»ni qaysi tashkilot e’lon qiladi?",
+   "options": [
+    "Jahon iqtisodiy forumi",
+    "Jahon sog‘liqni saqlash tashkiloti",
+    "YuNISEF",
+    "Xalqaro mehnat tashkiloti"
+   ],
+   "correct": 0,
+   "izoh": "Hisobot ayollar va erkaklarning iqtisodiyot, ta’lim, sog‘liq va siyosatdagi imkoniyatlari tengligini o‘lchaydi."
+  },
+  {
+   "q": "Korrupsiya indeksida mamlakat o‘rnining yaxshilanishi oddiy aholi uchun nimani anglatadi?",
+   "options": [
+    "Davlat xizmatlari shaffof va adolatli bo‘ladi, poraxo‘rlik kamayadi",
+    "Maktablar yopiladi",
+    "Ish haqi kamayadi",
+    "Chet elga chiqish taqiqlanadi"
+   ],
+   "correct": 0,
+   "izoh": "Shaffoflik oshgani sari investorlar ishonchi ortadi va fuqarolar xizmatlardan teng foydalanadi."
+  }
+ ],
+ "cross": [
+  {
+   "answer": "REYTING",
+   "clue": "Muayyan ko‘rsatkichlar bo‘yicha mamlakatlar o‘rnini belgilovchi tartiblangan ro‘yxat"
+  },
+  {
+   "answer": "INDEKS",
+   "clue": "Bir nechta ko‘rsatkichni umumlashtiruvchi yagona son qiymat"
+  },
+  {
+   "answer": "PISA",
+   "clue": "15 yoshli o‘quvchilar savodxonligini baholovchi xalqaro dastur"
+  },
+  {
+   "answer": "INVESTITSIYA",
+   "clue": "Reyting yaxshilansa mamlakatga ko‘proq kirib keladigan kapital mablag‘"
+  },
+  {
+   "answer": "KORRUPSIYA",
+   "clue": "Transparency International idrok etish indeksini hisoblaydigan ijtimoiy illat"
+  },
+  {
+   "answer": "FITCH",
+   "clue": "S&P va Moody’s bilan birga «katta uchlik»ka kiruvchi kredit reyting agentligi"
+  },
+  {
+   "answer": "BAXT",
+   "clue": "Jahon ... hisoboti aholining hayotdan qoniqish darajasini o‘lchaydi"
+  },
+  {
+   "answer": "INNOVATSIYA",
+   "clue": "WIPO tayyorlaydigan global ... indeksi"
+  },
+  {
+   "answer": "TURIZM",
+   "clue": "Xavfsizlik va qulaylik reytinglari yaxshilansa rivojlanadigan, sayyohlar bilan bog‘liq soha"
+  },
+  {
+   "answer": "KREDIT",
+   "clue": "Davlatning ... reytingi qarz olish narxiga (foiz stavkasiga) ta’sir qiladi"
+  },
+  {
+   "answer": "DAVOS",
+   "clue": "Jahon iqtisodiy forumining yillik yig‘ilishi o‘tadigan Shveytsariya shahri"
+  },
+  {
+   "answer": "UMR",
+   "clue": "Inson taraqqiyoti indeksi ko‘rsatkichlaridan biri: o‘rtacha ... davomiyligi"
+  },
+  {
+   "answer": "SHAFFOFLIK",
+   "clue": "Davlat organlari faoliyatining ochiqligi; korrupsiyaga qarshi kurashning asosiy sharti"
+  }
+ ]
+};
+
+document.getElementById('title').textContent = DATA.title;
+document.getElementById('subtitle').textContent = DATA.subtitle;
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  document.getElementById('tab-test').hidden = t.dataset.tab !== 'test';
+  document.getElementById('tab-cw').hidden = t.dataset.tab !== 'cw';
+  if (t.dataset.tab === 'cw') fitGrid();
+}));
+
+/* ---------- TEST ---------- */
+const LET = ['A','B','C','D','E','F'];
+let teams, active, cur, answers;
+function resetTest(keepNames){
+  const names = keepNames && teams ? teams.map(t => t.name) : ['1-jamoa','2-jamoa'];
+  teams = names.map(n => ({name:n, score:0}));
+  active = 0; cur = 0;
+  answers = DATA.test.map(() => null); // {chosen, team, ok}
+  document.getElementById('final').hidden = true;
+  document.getElementById('qcard').hidden = false;
+  renderTeams(); renderQ();
+}
+function renderTeams(){
+  const box = document.getElementById('teams');
+  box.innerHTML = '';
+  teams.forEach((t, i) => {
+    const d = document.createElement('div');
+    d.className = 'team' + (i === active ? ' active' : '');
+    d.title = 'Javob beruvchi jamoa sifatida tanlash';
+    d.innerHTML = `<input value="" aria-label="Jamoa nomi"><span class="score">${t.score}</span>
+      <span class="adj"><button data-d="1" title="Ball qo‘shish">+</button><button data-d="-1" title="Ball ayirish">−</button></span>`;
+    const inp = d.querySelector('input');
+    inp.value = t.name;
+    inp.addEventListener('input', () => { t.name = inp.value || `${i+1}-jamoa`; renderTurn(); });
+    inp.addEventListener('click', e => e.stopPropagation());
+    d.querySelectorAll('.adj button').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation(); t.score = Math.max(0, t.score + Number(b.dataset.d)); renderTeams();
+    }));
+    d.addEventListener('click', () => { active = i; renderTeams(); });
+    box.appendChild(d);
+  });
+  const tools = document.createElement('div');
+  tools.className = 'team-tools';
+  tools.innerHTML = `<button class="btn small" id="addT" ${teams.length>=6?'disabled':''}>+ Jamoa</button>
+    <button class="btn small" id="remT" ${teams.length<=1?'disabled':''}>− Jamoa</button>`;
+  box.appendChild(tools);
+  tools.querySelector('#addT').onclick = () => { teams.push({name:`${teams.length+1}-jamoa`, score:0}); renderTeams(); };
+  tools.querySelector('#remT').onclick = () => { teams.pop(); if (active >= teams.length) active = 0; renderTeams(); };
+  renderTurn();
+}
+function renderTurn(){
+  const a = answers[cur];
+  const el = document.getElementById('turnNote');
+  if (a) el.innerHTML = `Bu savolga <b>${esc(teams[a.team] ? teams[a.team].name : '—')}</b> javob berdi.`;
+  else el.innerHTML = `Hozir javob beradi: <b>${esc(teams[active].name)}</b> <span style="opacity:.8">(boshqa jamoani tanlash uchun uning kartochkasini bosing)</span>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderQ(){
+  const q = DATA.test[cur], a = answers[cur];
+  document.getElementById('qnum').textContent = `${cur+1}-savol / ${DATA.test.length}`;
+  document.getElementById('question').textContent = q.q;
+  const dots = document.getElementById('dots'); dots.innerHTML = '';
+  DATA.test.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'dot' + (i === cur ? ' cur' : '') + (answers[i] ? (answers[i].ok ? ' ok' : ' bad') : '');
+    b.textContent = i + 1;
+    b.onclick = () => { cur = i; renderQ(); };
+    dots.appendChild(b);
+  });
+  const box = document.getElementById('options'); box.innerHTML = '';
+  q.options.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="let">${LET[i]}</span><span>${esc(o)}</span>`;
+    if (a){
+      b.disabled = true;
+      if (i === q.correct) b.classList.add('correct');
+      else if (i === a.chosen) b.classList.add('wrong');
+      else b.classList.add('dim');
+    } else b.onclick = () => choose(i);
+    box.appendChild(b);
+  });
+  const fb = document.getElementById('feedback');
+  if (a){
+    fb.className = 'feedback ' + (a.ok ? 'ok' : 'bad');
+    fb.innerHTML = `<span class="t">${a.ok ? '✓ To‘g‘ri javob!' : '✗ Noto‘g‘ri javob'}</span>` +
+      (a.ok ? '' : `To‘g‘ri javob: <b>${LET[q.correct]}) ${esc(q.options[q.correct])}</b><br>`) +
+      (q.izoh ? `<span style="opacity:.9">${esc(q.izoh)}</span>` : '');
+  } else { fb.className = ''; fb.innerHTML = ''; }
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').textContent = cur === DATA.test.length - 1 ? 'Natijalar →' : 'Keyingi savol →';
+  renderTurn();
+}
+function choose(i){
+  const q = DATA.test[cur];
+  const ok = i === q.correct;
+  answers[cur] = {chosen:i, team:active, ok};
+  if (ok) teams[active].score++;
+  active = (active + 1) % teams.length; // navbat keyingi jamoaga
+  renderTeams(); renderQ();
+}
+document.getElementById('prevBtn').onclick = () => { if (cur > 0){ cur--; renderQ(); } };
+document.getElementById('nextBtn').onclick = () => {
+  if (cur < DATA.test.length - 1){ cur++; renderQ(); } else showFinal();
+};
+document.getElementById('restartBtn').onclick = () => { if (confirm('Test qaytadan boshlansinmi? Ballar nolga tushadi.')) resetTest(true); };
+function showFinal(){
+  const f = document.getElementById('final');
+  const max = Math.max(...teams.map(t => t.score));
+  const sorted = teams.slice().sort((a, b) => b.score - a.score);
+  const winners = teams.filter(t => t.score === max);
+  const answered = answers.filter(Boolean).length;
+  f.innerHTML = `<h2>🏆 Natijalar</h2>
+    <p style="color:var(--muted);margin:0">${answered} ta savolga javob berildi (jami ${DATA.test.length} ta)</p>
+    <div class="rows">${sorted.map(t => `<div class="row ${t.score === max && max > 0 ? 'win' : ''}"><span>${esc(t.name)}</span><span>${t.score} ball</span></div>`).join('')}</div>
+    <p style="font-size:22px;font-weight:700">${max === 0 ? 'Hali hech kim ball to‘plamadi.' : winners.length > 1 ? 'Durang! ' + winners.map(w => esc(w.name)).join(', ') : 'G‘olib: ' + esc(winners[0].name)}</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="backQ">← Savollarga qaytish</button>
+      <button class="btn primary" id="again">Qaytadan boshlash</button></div>`;
+  document.getElementById('qcard').hidden = true;
+  f.hidden = false;
+  f.querySelector('#backQ').onclick = () => { f.hidden = true; document.getElementById('qcard').hidden = false; };
+  f.querySelector('#again').onclick = () => resetTest(true);
+}
+resetTest(false);
+
+/* ---------- CROSSWORD ---------- */
+function layout(list){
+  const words = list.map((w, i) => ({...w, idx:i, word:w.answer.toUpperCase().replace(/[^A-ZА-ЯЁЎҚҒҲ]/g, '')}));
+  const base = words.slice().sort((a, b) => b.word.length - a.word.length);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let best = null;
+  for (let t = 0; t < 60; t++){
+    let order = base;
+    if (t > 0){ // birinchi so'z eng uzuni bo'lib qoladi, qolganlari aralashtiriladi
+      const rest = base.slice(1);
+      for (let i = rest.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; }
+      order = [base[0], ...rest];
+    }
+    const res = attempt(order);
+    const score = res.loose * 100000 + res.rows * res.cols + Math.abs(res.rows - res.cols) * 3;
+    if (!best || score < best.score) best = {...res, score};
+  }
+  return best;
+}
+function attempt(order){
+  const cells = new Map(); // "r,c" -> {ch, dirs:Set}
+  const key = (r, c) => r + ',' + c;
+  const placed = [];
+  function can(w, r, c, dir){
+    const dr = dir === 'D' ? 1 : 0, dc = dir === 'A' ? 1 : 0;
+    const L = w.word.length;
+    if (cells.has(key(r - dr, c - dc)) || cells.has(key(r + dr*L, c + dc*L))) return -1;
+    let inter = 0;
+    for (let k = 0; k < L; k++){
+      const rr = r + dr*k, cc = c + dc*k, cell = cells.get(key(rr, cc));
+      if (cell){
+        if (cell.ch !== w.word[k] || cell.dirs.has(dir)) return -1;
+        inter++;
+      } else {
+        // yon tomonlari bo'sh bo'lishi kerak
+        if (cells.has(key(rr + dc, cc + dr)) || cells.has(key(rr - dc, cc - dr))) return -1;
+      }
+    }
+    return inter;
+  }
+  function put(w, r, c, dir){
+    const dr = dir === 'D' ? 1 : 0, dc = dir === 'A' ? 1 : 0;
+    for (let k = 0; k < w.word.length; k++){
+      const kk = key(r + dr*k, c + dc*k);
+      if (!cells.has(kk)) cells.set(kk, {ch:w.word[k], dirs:new Set()});
+      cells.get(kk).dirs.add(dir);
+    }
+    placed.push({...w, r, c, dir});
+  }
+  function bounds(){
+    let r0=Infinity,r1=-Infinity,c0=Infinity,c1=-Infinity;
+    for (const k of cells.keys()){ const [r,c]=k.split(',').map(Number); r0=Math.min(r0,r);r1=Math.max(r1,r);c0=Math.min(c0,c);c1=Math.max(c1,c); }
+    return {r0,r1,c0,c1};
+  }
+  put(order[0], 0, 0, 'A');
+  let pending = order.slice(1);
+  let progress = true;
+  while (pending.length && progress){
+    progress = false;
+    const rest = [];
+    for (const w of pending){
+      let best = null;
+      const b = bounds();
+      for (const [k, cell] of cells){
+        const [r, c] = k.split(',').map(Number);
+        for (let i = 0; i < w.word.length; i++){
+          if (w.word[i] !== cell.ch) continue;
+          for (const dir of ['A','D']){
+            if (cell.dirs.has(dir)) continue;
+            const sr = dir === 'D' ? r - i : r, sc = dir === 'A' ? c - i : c;
+            const inter = can(w, sr, sc, dir);
+            if (inter < 1) continue;
+            const er = dir === 'D' ? sr + w.word.length - 1 : sr, ec = dir === 'A' ? sc + w.word.length - 1 : sc;
+            const h = Math.max(b.r1, er) - Math.min(b.r0, sr) + 1, wd = Math.max(b.c1, ec) - Math.min(b.c0, sc) + 1;
+            const score = inter * 40 - (h * wd) - Math.abs(h - wd) * 6;
+            if (!best || score > best.score) best = {score, sr, sc, dir};
+          }
+        }
+      }
+      if (best){ put(w, best.sr, best.sc, best.dir); progress = true; }
+      else rest.push(w);
+    }
+    pending = rest;
+  }
+  // kesishmaydigan so'zlar alohida joylashtiriladi
+  const loose = pending.length;
+  for (const w of pending){ const b = bounds(); put(w, b.r1 + 2, b.c0, 'A'); }
+  const b = bounds();
+  placed.forEach(p => { p.r -= b.r0; p.c -= b.c0; });
+  const rows = b.r1 - b.r0 + 1, cols = b.c1 - b.c0 + 1;
+  // raqamlash
+  const starts = [...new Set(placed.map(p => key(p.r, p.c)))]
+    .map(k => k.split(',').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  const num = new Map(starts.map((s, i) => [key(s[0], s[1]), i + 1]));
+  placed.forEach(p => p.num = num.get(key(p.r, p.c)));
+  return {rows, cols, placed, num, key, loose};
+}
+
+const CW = layout(DATA.cross);
+const revealed = new Set();
+let selected = null;
+function cellsOf(p){ return [...p.word].map((ch, k) => [p.dir === 'D' ? p.r + k : p.r, p.dir === 'A' ? p.c + k : p.c, ch]); }
+function buildGrid(){
+  const g = document.getElementById('grid');
+  g.style.gridTemplateColumns = `repeat(${CW.cols}, var(--cs,36px))`;
+  g.innerHTML = '';
+  const map = {};
+  CW.placed.forEach(p => cellsOf(p).forEach(([r, c]) => map[CW.key(r, c)] = true));
+  for (let r = 0; r < CW.rows; r++) for (let c = 0; c < CW.cols; c++){
+    const d = document.createElement('div');
+    const k = CW.key(r, c);
+    d.className = 'cell' + (map[k] ? ' on' : '');
+    d.id = 'c' + r + '_' + c;
+    if (map[k]){
+      if (CW.num.has(k)) d.innerHTML = `<span class="n">${CW.num.get(k)}</span>`;
+      d.insertAdjacentHTML('beforeend', '<span class="l"></span>');
+    }
+    g.appendChild(d);
+  }
+}
+function paint(animIdx){
+  document.querySelectorAll('.cell .l').forEach(l => l.textContent = '');
+  document.querySelectorAll('.cell.hl').forEach(c => c.classList.remove('hl'));
+  CW.placed.forEach(p => {
+    if (!revealed.has(p.idx)) return;
+    cellsOf(p).forEach(([r, c, ch], k) => {
+      const l = document.querySelector(`#c${r}_${c} .l`);
+      l.textContent = ch;
+      if (p.idx === animIdx){ l.classList.remove('pop'); l.style.animationDelay = (k * 0.06) + 's'; void l.offsetWidth; l.classList.add('pop'); }
+    });
+  });
+  if (selected != null){
+    const p = CW.placed.find(x => x.idx === selected);
+    cellsOf(p).forEach(([r, c]) => document.getElementById(`c${r}_${c}`).classList.add('hl'));
+  }
+  document.querySelectorAll('.clue').forEach(el => {
+    const idx = Number(el.dataset.idx), on = revealed.has(idx);
+    el.classList.toggle('sel', idx === selected);
+    el.classList.toggle('done', on);
+    el.querySelector('.ans').hidden = !on;
+    el.querySelector('button').textContent = on ? 'Yashirish' : 'Javobni ko‘rsatish';
+  });
+  const big = document.getElementById('bigClue');
+  if (selected != null){
+    const p = CW.placed.find(x => x.idx === selected);
+    big.innerHTML = `<small>${p.num}. ${p.dir === 'A' ? 'Eniga' : 'Bo‘yiga'} · ${p.word.length} ta harf</small>${esc(p.clue)}` +
+      (revealed.has(p.idx) ? ` — <b style="color:var(--ok);letter-spacing:.06em">${p.word}</b>` : '');
+  }
+}
+function buildClues(){
+  const box = document.getElementById('cluesA');
+  {
+    CW.placed.slice().sort((a, b) => a.num - b.num || (a.dir === 'A' ? -1 : 1)).forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'clue'; el.dataset.idx = p.idx;
+      el.innerHTML = `<span class="cn">${p.num}</span><span class="ct"><b class="dir" title="${p.dir === 'A' ? 'Eniga' : 'Bo‘yiga'}">${p.dir === 'A' ? '→ Eniga' : '↓ Bo‘yiga'}</b> ${esc(p.clue)} <span class="len">(${p.word.length} harf)</span><span class="ans" hidden>${p.word}</span></span>
+        <button class="btn small">Javobni ko‘rsatish</button>`;
+      el.addEventListener('click', () => { selected = p.idx; paint(); });
+      el.querySelector('button').addEventListener('click', e => {
+        e.stopPropagation(); selected = p.idx;
+        if (revealed.has(p.idx)) { revealed.delete(p.idx); paint(); } else { revealed.add(p.idx); paint(p.idx); }
+      });
+      box.appendChild(el);
+    });
+  }
+}
+function fitGrid(){
+  const box = document.getElementById('gridBox');
+  const w = box.clientWidth - 10;
+  if (w <= 0) return;
+  const cs = Math.max(20, Math.min(44, Math.floor(w / CW.cols)));
+  document.getElementById('grid').style.setProperty('--cs', cs + 'px');
+}
+document.getElementById('showAll').onclick = () => { CW.placed.forEach(p => revealed.add(p.idx)); paint(); };
+document.getElementById('hideAll').onclick = () => { revealed.clear(); paint(); };
+window.addEventListener('resize', fitGrid);
+buildGrid(); buildClues(); paint(); fitGrid();
+</script>
+</body>
+</html>
